@@ -1,0 +1,602 @@
+<html>
+<head>
+<title></title>
+</head>
+
+<script language="javascript" type="text/javascript" src="./js/ajaxbasic.js"></script>
+<script language="javascript">
+
+var supportWimax = 0;
+var supportLte = 0;
+var supportWCDMA= 0;
+var supportWifiAP = 0;
+var supportWifiSTA = 0;
+var supportUpdate = 1;
+var supportOperator = 1;
+
+slide.objects = new Array(); 
+slide.addId = function(Id) 
+{ 
+	for (var i=0; i < slide.objects.length; i++) 
+	{ 
+		if (slide.objects[i].id == Id) return true; 
+	} 
+	slide.objects[slide.objects.length] = document.getElementById(Id); 
+} 
+
+function DisableElements()
+{  
+    TheForm=document.forms[0].elements;  
+    for(i=0;i<TheForm.length;i++){  
+      TheForm[i].disbaled="true";  
+    }  
+}  
+  
+function slide(Id, interval, to) 
+{ 
+	var obj = document.getElementById(Id); 
+	var H, step = 5; 
+
+	if (obj == null)
+	{
+		return;
+	}
+
+	if (to == undefined) 
+	{
+		if (obj._slideStart == true)
+		{
+			return; 
+		}
+		
+		if (obj._expand == true) 
+		{ 
+			to = 0; 
+			obj.style.overflow = "hidden"; 
+		}
+		else
+		{
+			slide.addId(Id); 
+			for(var i=0; i < slide.objects.length; i++) 
+			{
+				if (slide.objects[i].id != Id && slide.objects[i]._expand == true)
+				{
+					//slide(slide.objects[i].id); 
+				} 
+			} 
+
+			obj.style.height = ""; 
+			obj.style.overflow = ""; 
+			obj.style.display = "block"; 
+			to = obj.offsetHeight;
+			obj.style.overflow = "hidden"; 
+			obj.style.height = "1px"; 
+		} 
+		obj._slideStart = true; 
+	} 
+    
+	step            = ((to > 0) ? 1:-1) * step; 
+	interval        = ((interval==undefined) ? 10 : interval); 
+
+	obj.style.height = (H=((H=(isNaN(H=parseInt(obj.style.height))?0:H))+step<0)?0:H+step)+"px"; 
+
+	if (H <= 0) 
+	{ 
+		obj.style.display = "none"; 
+		obj.style.overflow = "hidden"; 
+		obj._expand = false; 
+		obj._slideStart = false; 
+	}
+	else if (to > 0 && H >= to)
+	{ 
+		obj.style.display = "block"; 
+		obj.style.overflow = "visible"; 
+		obj.style.height = H + "px"; 
+		obj._expand = true; 
+		obj._slideStart = false; 
+	}else
+	{ 
+		setTimeout("slide('"+Id+"' , "+interval+", "+to+");", interval); 
+	} 
+} 
+
+function expandAll()
+{
+	for(var i=0; i < slide.objects.length; i++) 
+	{
+		if ( slide.objects[i]._expand != true)
+		{
+			slide(slide.objects[i].id); 
+		} 
+	} 
+}
+
+function collapseAll()
+{
+	for(var i=0; i < slide.objects.length; i++) 
+	{
+		if ( slide.objects[i]._expand == true)
+		{
+			slide(slide.objects[i].id); 
+		} 
+	} 
+}
+
+function activeUpdateMenu()
+{
+	if ( supportUpdate == '1' )
+	{
+		parent.body.location.href='update.html';
+	}
+	else
+	{
+		alert("Not supported !!!");
+	}
+}
+
+function registerSubMenu()
+{
+	var allElements = document.getElementsByTagName("*");
+	var element;
+	for (var i = 0; (element = allElements[i]) != null; i++) 
+	{
+		if (element.className == "menu_main" || element.className == "menu_item")
+		{
+			if ( element.id.match("wimax") )
+			{
+				if (supportWimax == 1)
+					element.style.display = "block";
+			}
+			else if ( element.id.match("lte"))
+			{
+				if (supportLte == 1)
+					element.style.display = "block";
+
+			}
+			else if ( element.id.match("wcdma"))
+			{
+				if (supportWCDMA == 1)
+					element.style.display = "block";
+			}
+			else if ( element.id.match("wifiap"))
+			{
+				if (supportWifiAP == 1)
+					element.style.display = "block";
+			}
+			else if ( element.id.match("wifista"))
+			{
+				if (supportWifiSTA == 1)
+					element.style.display = "block";
+			}
+			else
+				element.style.display = "block";
+		}
+
+		else if (element.className == "menu_sub")
+		{
+			if ( element.id.match("wimax") )
+			{
+				if (supportWimax == 1)
+					slide.addId(element.id);
+			}
+			else if ( element.id.match("lte"))
+			{
+				if (supportLte == 1)
+					slide.addId(element.id);
+
+			}
+			else if ( element.id.match("wcdma"))
+			{
+				if (supportWCDMA== 1)
+					slide.addId(element.id);
+			}
+			else if ( element.id.match("wifiap"))
+			{
+				if (supportWifiAP == 1)
+					slide.addId(element.id);
+			}
+			else if ( element.id.match("wifista"))
+			{
+				if (supportWifiSTA == 1)
+					slide.addId(element.id);
+			}
+			else
+					slide.addId(element.id);
+		}
+
+			
+	}
+}
+
+function getComponent() 
+{
+	XHRGet(getComponentHandle, "./cgi-bin/systemcomponent.cgi?Command=GetComponent", false);	
+}
+
+function getComponentHandle(xmlDoc)
+{
+	if (getDataFromTag(xmlDoc, "wimax") == "y") supportWimax = 1;
+	if (getDataFromTag(xmlDoc, "lte") == "y") supportLte = 1;
+	if (getDataFromTag(xmlDoc, "wcdma") == "y") supportWCDMA = 1;
+	if (getDataFromTag(xmlDoc, "wifiap") == "y") supportWifiAP = 1;
+	if (getDataFromTag(xmlDoc, "wifista") == "y") supportWifiSTA = 1;
+	if (getDataFromTag(xmlDoc, "disablefwupdate") == "y") supportUpdate = 0;
+}
+
+function getLanuageResults(xmlDoc)
+{
+	if (hasError(xmlDoc))
+	{
+		showError(xmlDoc);
+		return;
+	}
+	//alert("TR069GetAllSettingHandle");
+	
+	var g_lang_flag = getDataFromTag(xmlDoc, "LANGUAGE");
+//	alert("info:"+g_lang_flag);
+	//var json = eval("("+g_lang_info+")");
+	//	alert(json.length);
+	//g_lang = json.info.h_ban.innerHTML.in_st;
+	//var json = g_lang_info.parseJSON();
+	//var obj=JSON.parse(g_lang_info);
+	//g_lang = json.info.userid;	
+	//var json = eval("("+g_lang_info+")");
+	//g_lang=json.type[0];
+	//alert("info[0]:"+g_lang);
+	//top.g_lang = top.g_lang_info.info[g_lang_flag];
+}
+
+function getLanuageHandless()
+{
+	//alert("bb");
+	var url = "./cgi-bin/syslanguage.cgi?Command=Language";
+	XHRGet(getLanuageResults, url, false);	
+	//alert("ccc");
+}
+
+function initSystem()
+{
+	//alert("init456789");
+	getLanuageHandless();
+}
+
+
+
+
+function getLanuagebufResults(xmlDoc)
+{
+	if (hasError(xmlDoc))
+	{
+		showError(xmlDoc);
+		return;
+	}
+	//alert("DDEE");
+	var g_lang_buf = getDataFromTag(xmlDoc, "LANGUAGEBUF");
+	//alert("info:"+g_lang_flag.info[0]);
+	top.g_lang = top.g_lang_buf.info[0];
+}
+
+function getLanuagebufHandless()
+{
+	//alert("BB");
+	var url = "./cgi-bin/syslanguage.cgi?Command=Languagebuf";
+	XHRGet(getLanuagebufResults, url, false);	
+	//alert("CC");
+}
+
+function initLanguagebuf()
+{
+
+		//alert("langbuf123456");
+		getLanuagebufHandless();		
+}
+
+
+function initialize()
+{
+	getComponent();
+	registerSubMenu();
+    document.getElementById('system222').style.display = 'none';
+	document.getElementById('ltesetting2').style.display = 'none';
+	//alert("aaa"+document.getElementById('system1').innerText);
+	//document.getElementById('system1').innerText = "System";
+	try
+    {
+    //	alert("firxt init");
+     //   top.initSystem();
+	  //initSystem();
+	  initLanguagebuf();
+    }
+    catch(E){}
+	
+	//alert("str_sec:"+in_se);
+	//alert("str_resting:"+in_st);
+	//document.getElementById('system1').innerText=g_lang;
+	//getLanuagevalues();
+	//getLanuagevalueses();
+	
+	
+	//alert(top.g_lang.h_left.innerHTML.in_id_system1);
+	//alert("aaa"+document.getElementById('system1').innerHTML);
+	
+	document.getElementById('system1').innerHTML=top.g_lang.h_left.innerHTML.in_id_system1;
+	document.getElementById('system21').innerHTML=top.g_lang.h_left.innerHTML.in_id_system21;
+	document.getElementById('system22').innerHTML=top.g_lang.h_left.innerHTML.in_id_system22;
+	document.getElementById('system222').innerHTML=top.g_lang.h_left.innerHTML.in_id_system222;
+	document.getElementById('system23').innerHTML=top.g_lang.h_left.innerHTML.in_id_system23;
+	document.getElementById('portforwarding').innerHTML=top.g_lang.h_left.innerHTML.in_id_portforwarding;
+	document.getElementById('tr069').innerHTML=top.g_lang.h_left.innerHTML.in_id_tr069;
+	document.getElementById('ntp').innerHTML=top.g_lang.h_left.innerHTML.in_id_ntp;
+	document.getElementById('user').innerHTML=top.g_lang.h_left.innerHTML.in_id_user;
+	document.getElementById('diagnostic').innerHTML=top.g_lang.h_left.innerHTML.in_id_diagnostic;
+	document.getElementById('system24').innerHTML=top.g_lang.h_left.innerHTML.in_id_system24;
+	document.getElementById('system25').innerHTML=top.g_lang.h_left.innerHTML.in_id_system25;
+	document.getElementById('system27').innerHTML=top.g_lang.h_left.innerHTML.in_id_system27;
+	document.getElementById('system28').innerHTML=top.g_lang.h_left.innerHTML.in_id_system28;
+	document.getElementById('lte1').innerHTML=top.g_lang.h_left.innerHTML.in_id_lte1;
+	document.getElementById('lte21').innerHTML=top.g_lang.h_left.innerHTML.in_id_lte21;
+	document.getElementById('ltesetting1').innerHTML=top.g_lang.h_left.innerHTML.in_id_ltesetting1;
+	document.getElementById('ltesetting2').innerHTML=top.g_lang.h_left.innerHTML.in_id_ltesetting2;
+	document.getElementById('lte24').innerHTML=top.g_lang.h_left.innerHTML.in_id_lte24;
+	document.getElementById('lte25').innerHTML=top.g_lang.h_left.innerHTML.in_id_lte25;
+	document.getElementById('volte').innerHTML=top.g_lang.h_left.innerHTML.in_id_volte;
+	document.getElementById('lte26').innerHTML=top.g_lang.h_left.innerHTML.in_id_lte26;
+	document.getElementById('lteplmncsg').innerHTML=top.g_lang.h_left.innerHTML.in_id_lteplmncsg;
+	document.getElementById('wifiap1').innerHTML=top.g_lang.h_left.innerHTML.in_id_wifiap1;
+	document.getElementById('wifiap21').innerHTML=top.g_lang.h_left.innerHTML.in_id_wifiap21;
+	document.getElementById('wifiap22').innerHTML=top.g_lang.h_left.innerHTML.in_id_wifiap22;
+	document.getElementById('wifiap23').innerHTML=top.g_lang.h_left.innerHTML.in_id_wifiap23;
+	document.getElementById('wifiap24').innerHTML=top.g_lang.h_left.innerHTML.in_id_wifiap24;
+	document.getElementById('wifiap25').innerHTML=top.g_lang.h_left.innerHTML.in_id_wifiap25;
+	/*document.getElementById('wifista26').innerHTML=top.g_lang.h_left.innerHTML.in_id_wifista26;*/
+	document.getElementById('engineer1').innerHTML=top.g_lang.h_left.innerHTML.in_id_engineer1;
+	document.getElementById('engineer24').innerHTML=top.g_lang.h_left.innerHTML.in_id_engineer24;
+	document.getElementById('engwimaxnv').innerHTML=top.g_lang.h_left.innerHTML.in_id_engwimaxnv;
+	document.getElementById('engltenv').innerHTML=top.g_lang.h_left.innerHTML.in_id_engltenv;	
+	document.getElementById('engcommonnv').innerHTML=top.g_lang.h_left.innerHTML.in_id_engcommonnv;	
+	document.getElementById('engsysconfig').innerHTML=top.g_lang.h_left.innerHTML.in_id_engsysconfig;	
+	document.getElementById('englog').innerHTML=top.g_lang.h_left.innerHTML.in_id_englog;
+	document.getElementById('Expand').innerHTML=top.g_lang.h_left.innerHTML.in_id_Expand;
+	document.getElementById('Collapse').innerHTML=top.g_lang.h_left.innerHTML.in_id_Collapse;
+
+}
+
+function switchoff()
+{
+     document.getElementById('system22').style.display= 'block';
+     document.getElementById('system222').style.display= 'none';
+}
+function switchon()
+{
+	document.getElementById('system222').style.display= 'block';
+	document.getElementById('system22').style.display = 'none';
+}
+	
+function OnClick1() 
+{
+	parent.body.location.href='systemnetwork.html';
+	switchon();
+
+	setTimeout("switchoff()", 1000);
+}
+
+function ltesettingDisable()
+{
+	document.getElementById('ltesetting2').style.display = 'block';
+	document.getElementById('ltesetting1').style.display = 'none';
+	
+}
+
+function ltesettingEnable()
+{
+	document.getElementById('ltesetting1').style.display = 'block';
+	document.getElementById('ltesetting2').style.display = 'none';
+}
+
+function OnLteSetting()
+{
+	parent.body.location.href='ltesetting.html';
+	ltesettingDisable();
+
+	setTimeout("ltesettingEnable()", 1500);
+}
+
+
+//oBtn.onclick=function(){
+//	oBtn.innelHTML="hello"
+//}
+
+
+window.onload=function() 
+{
+	alert(top.g_lang.h_left.innerHTML.in_id_system1);
+	//g_lang = g_lang_info.info[0];
+		//getLanuagevalueses();
+}
+
+
+</script>
+
+<link rel="stylesheet" type="text/css" href="./css/gct_new.css">
+<style type="text/css">
+
+.menu_main { 
+	height: 25px;
+	line-height: 25px;
+	padding-left: 5px;
+	border-top: 1px dotted #444444;
+	border-right: 1px dotted #AAAAAA;
+	color: #005588;
+} 
+
+.menu_main_h { 
+	height: 25px;
+	line-height: 25px;
+	padding-left: 5px;
+	border-top: 1px dotted #AAAAAA;
+	border-right: 1px dotted #AAAAAA;
+	color: #FFFFFF;
+	background-color: #444444; 
+	cursor: hand; 
+}
+
+.menu_sub { 
+	padding-left: 5px;
+	display: none; 
+} 
+
+.menu_item {
+	height: 20px;
+	line-height: 20px;
+	padding-left: 5px;
+	border-left: 1px dotted #AAAAAA;
+	border-right: 1px dotted #AAAAAA;
+	color: #222222;
+}
+
+.menu_item_h {
+	height: 20px;
+	line-height: 20px;
+	padding-left: 5px;
+	border-left: 1px dotted #AAAAAA;
+	border-right: 1px dotted #AAAAAA;
+	color: #FFFFFF;
+	background-color: #444444; 
+	cursor: hand; 
+}
+
+</style>	
+
+<body onload="initialize()">
+
+<div style="display:none" id="system1" class="menu_main" onmouseover="this.className='menu_main_h'" onmouseout="this.className='menu_main'" onclick="slide('system2');"> 
+系统 
+</div>
+
+
+
+<div style="display:none" id="system2" class="menu_sub">
+
+	
+<!--	<div style="display:none" id="system111" class="menu_item"  onmouseover="this.className='menu_item_h'"  onmouseout="this.className='menu_item'" onclick="parent.body.location.href='index1.html';" > 按钮<div/>  -->
+	
+<!--	<div style="display:none" id="tr069" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemLanguage.html';">语言切换</div> -->
+	<div style="display:none" id="system21" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemstatus.html';">状态</div>
+<!--
+	<div style="display:none" id="system22" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemnetwork.html';">Network</div>
+-->
+	<div style="display:none" id="system22" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="OnClick1();">网络</div>
+
+	<div style="display:hidden" id="system222" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'">网络</div>
+
+	<div style="display:none" id="system23" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemcm.html';">连接管理</div> 
+	<div style="display:none" id="portforwarding" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemportforwarding.html';">NAT/Router 管理</div>
+	<div style="display:none" id="tr069" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='tr069.html';">TR069</div>
+	<div style="display:none" id="ntp" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='ntp.html';">NTP</div>
+	<div style="display:none" id="user" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='user.html';">用户</div>
+	<div style="display:none" id="diagnostic" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='diagnostic.html';">诊断</div>
+	<div style="display:none" id="system24" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="activeUpdateMenu()">固件升级</div>
+	<div style="display:none" id="system25" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='factoryreset.html';">恢复出厂设置</div>
+	<div style="display:none" id="system27" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemreboot.html';">重启</div>
+	<div style="display:none" id="system28" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemLanguage.html';">系统语言</div>
+</div> 
+</div>
+
+
+
+<div style="display:none" id="wimax1" class="menu_main" onmouseover="this.className='menu_main_h'" onmouseout="this.className='menu_main'" onclick="slide('wimax2');">
+	无线城域网
+</div>
+<div style="display:none" id="wimax2" class="menu_sub"> 
+	<div style="display:block" id="wimax21" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wimaxstatus.html';">状态</div>
+	<div style="display:block" id="wimax22" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wimaxsetting.html';">设置</div>
+</div> 
+</div>
+
+
+
+
+<div style="display:none" id="lte1" class="menu_main" onmouseover="this.className='menu_main_h'" onmouseout="this.className='menu_main'" onclick="slide('lte2');">
+	LTE
+</div> 
+<div style="display:none" id="lte2" class="menu_sub"> 
+	<div style="display:none" id="lte21" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='ltestatus.html';">状态</div>
+	<div style="display:none" id="ltesetting1" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="OnLteSetting();">设置</div>
+	<div style="display:hidden" id="ltesetting2" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'">设置</div>
+<!--
+	<div style="display:none" id="lte23" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='lte_cm.html';">Manual CM</div>
+-->
+	<div style="display:none" id="lte24" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='lte_sim_pin.html';">SIM PIN</div>
+	<div style="display:none" id="lte25" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='lte_sms.html';">短信</div>
+
+	<div style="display:none" id="volte" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='lte_volte.html';">高清语音</div>	
+	<div style="display:none" id="lte26" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='lte_ota_dm.html';">OTA-DM</div> 
+	<div style="display:none" id="lteplmncsg" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='lteplmncsg.html';">PLMN CSG</div>
+
+</div> 
+
+
+
+<div style="display:none" id="wcdma1" class="menu_main" onmouseover="this.className='menu_main_h'" onmouseout="this.className='menu_main'" onclick="slide('wcdma2');">
+	WCDMA
+</div> 
+<div style="display:none" id="wcdma2" class="menu_sub"> 
+	<div style="display:none" id="wcdma21" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wcdmasetting.html';">设置</div>
+</div> 
+
+
+
+<div style="display:none" id="wifiap1" class="menu_main" onmouseover="this.className='menu_main_h'" onmouseout="this.className='menu_main'" onclick="slide('wifiap2');">
+	WiFi
+</div> 
+<div style="display:none" id="wifiap2" class="menu_sub"> 
+	<div style="display:none" id="wifiap21" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wifiapstatus.html';">AP 状态</div>
+	<div style="display:none" id="wifiap22" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wifiapcommon.html';">AP 通用</div>
+	<div style="display:none" id="wifiap23" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wifiapsetting.html';">AP 设置</div>
+	<div style="display:none" id="wifiap25" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wpssetting.html';">WPS Setting</div>
+	<div style="display:none" id="wifiap24" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wifiapaccess.html';">AP 访问控制</div> 
+<!--
+	<div style="display:none" id="wifiap25" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wifiapwps.html';">AP WPS Setting</div>
+
+	<div style="display:none" id="wifista26" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wifistasetting.html';">STA Setting</div> 
+	-->
+</div> 
+
+
+<div style="display:none" id="engineer1" class="menu_main" onmouseover="this.className='menu_main_h'" onmouseout="this.className='menu_main'" onclick="slide('engineer2');" >
+	工程
+</div> 
+<div style="display:none" id="engineer2" class="menu_sub"> 
+	
+<!--	<div style="display:none" id="engwimaxdebug" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='wimaxdebug.html';">Wimax Debug</div>	-->
+	
+	<div style="display:none" id="engineer24" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemupload.html';" >文件上传</div>
+	
+	<div style="display:none" id="engwimaxnv" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemnvwimax.html';" >NV-Wimax</div>
+
+	<div style="display:none" id="engltenv" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemnvlte.html';" >NV-LTE</div>
+
+	<div style="display:none" id="engcommonnv" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemnvcommon.html';" >NV-Common</div>
+	
+	<div style="display:none" id="engsysconfig" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemconfig.html';" >保存/重新加载配置</div>
+	
+	<div style="display:none" id="englog" class="menu_item" onmouseover="this.className='menu_item_h'" onmouseout="this.className='menu_item'" onclick="parent.body.location.href='systemlog.html';" >日志</div>
+
+</div> 
+
+<br>
+
+<div onclick="expandAll()" style="float:left; border-radius: 10px; cursor:pointer; padding:10px; color: #666666; border: 1px dotted #AAAAAA;" id="Expand">
+	Expand
+</div>
+<div onclick="collapseAll()" style="float:left; border-radius: 10px; cursor:pointer; padding:10px; color: #666666; border: 1px dotted #AAAAAA;" id="Collapse">
+	Collapse
+</div>
+
+
+
+
+
+</body>
+</html>
+	

@@ -1,0 +1,151 @@
+<html>
+<head>
+<title></title>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+</head>
+<script language="javascript" type="text/javascript" src="./js/ajaxbasic.js"></script>
+<script language="javascript">
+
+function Enablelanguage()
+{
+	var autoexec_obj = document.getElementsByName("autoexec");
+	var autoexec,i;
+	for ( i = 0 ; i < autoexec_obj.length ; i++ )
+	{
+		if (autoexec_obj[i].checked)
+			autoexec = autoexec_obj[i].value;	
+	}
+	//var param = "Command=SetTR069Enable"
+	//		+ "&AUTO_EXEC=" + autoexec;
+	var param = "Command=SetlanguageEnable"+"&LANG="+autoexec;
+	XHRPost(SetlanguageEnableHandler, "./cgi-bin/syslanguage.cgi", param, true);	
+}
+
+function SetlanguageEnableHandler(xmlDoc)
+{
+	if (hasError(xmlDoc))
+	{
+		showError(xmlDoc);
+		return;
+	}
+	//alert("Setting has been changed.\n");
+	alert(top.g_lang.h_syslanguage.js_string.str_alert_seting_changed);
+	//parent.leftmenu.location.reload();
+	top.location.reload();
+	//location.reload();
+}
+
+function TR069GetAllSetting()
+{
+	var url = "./cgi-bin/syslanguage.cgi?Command=GetLanguageAllSetting";
+	XHRGet(tr069statusHandle, url, true);
+}
+
+function tr069statusHandle(xmlDoc)
+{
+
+	if (hasError(xmlDoc))
+	{
+		showError(xmlDoc);
+		return;
+	}
+	//alert("TR069GetAllSettingHandle");
+
+	
+	var autoexec_obj = document.getElementsByName("autoexec");
+	var enable = getDataFromTag(xmlDoc, "LANGUAGE");
+	for ( var i = 0 ; i < autoexec_obj.length ; i++ )
+	{
+		if (autoexec_obj[i].value == enable[0] )
+			autoexec_obj[i].checked = true;	
+		else
+			autoexec_obj[i].checked = false;
+	}
+}
+
+function ethernetGetNetworkHandle(xmlDoc)
+{
+
+
+}
+
+
+
+function getLanuageResults(xmlDoc)
+{
+	if (hasError(xmlDoc))
+	{
+		showError(xmlDoc);
+		return;
+	}
+	var g_lang_flag = getDataFromTag(xmlDoc, "LANGUAGE");
+	alert("info:"+g_lang_flag);
+	//top.g_lang = top.g_lang_info.info[g_lang_flag];
+	
+}
+
+function getLanuageHandless()
+{
+	//alert("bb");
+	var url = "./cgi-bin/syslanguage.cgi?Command=Language";
+	XHRGet(getLanuageResults, url, false);	
+	//alert("ccc");
+}
+
+function initSystem()
+{
+	getLanuageHandless();
+}
+
+function initialize()
+{
+	TR069GetAllSetting();
+
+	try
+    {
+    	//alert("firxt init");
+       // top.initSystem();
+	 	initSystem();
+    }
+    catch(E){}
+		//parent.leftmenu.location.reload();
+	document.getElementById("id_language_tb").innerHTML=top.g_lang.h_syslanguage.innerHTML.in_id_language_tb;
+	document.getElementById("id_language_transformation_tb").innerHTML=top.g_lang.h_syslanguage.innerHTML.in_id_language_transformation_tb;
+	document.getElementById("id_enable_tb").innerHTML=top.g_lang.h_syslanguage.innerHTML.in_id_enable_tb;
+	document.getElementById("id_ch_en_tb").innerHTML=top.g_lang.h_syslanguage.innerHTML.in_id_ch_en_tb;
+	document.getElementById("id_epplie_tb").innerHTML=top.g_lang.h_syslanguage.innerHTML.in_id_epplie_tb;	
+}
+
+</script>
+<link rel="stylesheet" type="text/css" href="./css/gct_new.css">
+<body onload="initialize()">
+
+<div class="pageHolder">
+
+<table class="table_title" valign="center">
+    <tr><td id="id_language_transformation_tb">语言转换</tr></td>
+</table>
+<br/>
+<table class="table_content">
+<form id="language_enable">
+	<col width=150>
+	<col width=450>
+	<tr><th colspan="2" id="id_language_tb"><img src="./img/tick.png">&nbsp; 语言设定:</th></tr>
+	<tr>
+		<td class="table_shaded" id="id_enable_tb">启用</td>
+		<td class="table_white" id="id_ch_en_tb">
+			<input type="radio" name="autoexec" value="0" >英文&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="autoexec" value="1">中文&nbsp;&nbsp;&nbsp;
+		</td>
+	</tr>
+	<tr>	
+		<td class="table_white" colspan="2" align="right" id="id_epplie_tb">
+			<input type="button" class="pbutton" id="language_enable_switch" value="Apply" onclick="Enablelanguage()">
+		</td>																						
+	</tr>
+</form>	
+</table>
+<br/>
+</div>
+</body>
+</html> 
